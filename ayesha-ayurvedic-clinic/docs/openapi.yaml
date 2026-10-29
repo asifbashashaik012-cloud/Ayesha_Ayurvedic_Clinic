@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Ayesha Ayurvedic Clinic API
+  description: Official appointment booking and clinical inquiry service for Ayesha Ayurvedic Clinic (Dr. Shaik Ayesha, B.A.M.S., Andhra Board Regn. No. 2545/A/2025).
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: Local development / production server
+paths:
+  /clinic:
+    get:
+      summary: Retrieve verified clinic details and credentials
+      responses:
+        '200':
+          description: Clinic profile, Andhra Board registration, address, timings, and map URL
+  /treatments:
+    get:
+      summary: List all clinical treatments and specialized therapies
+      responses:
+        '200':
+          description: Array of verified Ayurvedic treatments (Telugu & English)
+  /availability:
+    get:
+      summary: Check live consultation availability for Wednesdays and Fridays
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: weeks
+          in: query
+          schema:
+            type: integer
+            default: 8
+      responses:
+        '200':
+          description: Available days, remaining daily slots (max 3/day), and weekly capacity (max 6/week)
+  /appointments:
+    post:
+      summary: Book an online consultation (Voice Call or Video Call)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [patientName, phone, startsAt]
+              properties:
+                patientName:
+                  type: string
+                phone:
+                  type: string
+                startsAt:
+                  type: string
+                  format: date-time
+                consultationType:
+                  type: string
+                  enum: [VOICE_CALL, VIDEO_CALL]
+                  default: VOICE_CALL
+                age:
+                  type: integer
+                healthConcern:
+                  type: string
+      responses:
+        '201':
+          description: Appointment confirmed with booking reference, mode message, Zoom link (if video), and WhatsApp sync URL
+        '400':
+          description: Invalid day (not Wed/Fri) or invalid time (outside 5:00-8:30 PM)
+        '409':
+          description: Capacity full (daily limit 3 or weekly limit 6 reached)
+  /appointments/lookup:
+    get:
+      summary: Look up an appointment by reference code and phone number
+      parameters:
+        - name: referenceCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: phone
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Appointment details, status, and Zoom credentials
+        '404':
+          description: Appointment not found or phone mismatch
+  /appointments/cancel:
+    post:
+      summary: Cancel an appointment and release capacity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [referenceCode, phone]
+              properties:
+                referenceCode:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Appointment cancelled and capacity released
+        '404':
+          description: Appointment not found
+  /admin/login:
+    post:
+      summary: Administrator login for clinic staff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authentication successful
+        '401':
+          description: Invalid credentials
+  /admin/appointments:
+    get:
+      summary: Overview of all appointments and weekly capacity metrics
+      responses:
+        '200':
+          description: Appointment list and weekly quota gauge

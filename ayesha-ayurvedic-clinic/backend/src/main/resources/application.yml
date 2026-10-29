@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ayesha-ayurvedic-clinic
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ayesha_clinic}
+    username: ${SPRING_DATASOURCE_USERNAME:clinic_app}
+    password: ${SPRING_DATASOURCE_PASSWORD:clinic_secret_2026}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: true
+
+clinic:
+  booking:
+    enabled: true
+  contact:
+    primary: "+918465058469"
+    secondary: "+919848339262"
+  location:
+    address: "10-188, Tholla Bazar, Near Congress Office / Jaibhavi Centre, Tiruvuru, Krishna District, AP - 521235"
+    maps_url: "https://maps.app.goo.gl/wo1SKmo2VKCcEe8G8?g_st=ac"
+
+whatsapp:
+  api:
+    enabled: false # Set to true when WhatsApp Cloud API credentials are configured in .env
+    token: ${WHATSAPP_ACCESS_TOKEN:}
+    phone_id: ${WHATSAPP_PHONE_NUMBER_ID:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
